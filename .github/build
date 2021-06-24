@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+
+import argparse
+from packaging import version
+import re
+import shlex
+import subprocess
+
+
+def run(parsed_args):
+    output = subprocess.check_output(
+        ['bashbrew',
+            '--library', parsed_args.bashbrew_library,
+            'list', parsed_args.bashbrew_repo,
+        ],
+    )
+    alpine_tags = [
+        tag.strip().split(':')[1] for tag in output.decode().split() if len(tag) > 0
+    ]
+    tag_regex = re.compile(r'^(latest)|(\d+\.\d+)$')
+    if parsed_args.software:
+        versions = {}
+        for tag in alpine_tags:
+            if not tag_regex.match(tag):
+                continue
+            software_regex = re.compile(
+                '^' + parsed_args.software + r'-(\d+\.\d+)(\.\d+)?-r\d+$'
+            )
+            raw_output = subprocess.check_output([
+                'docker', 'run', '--rm',
+                    '--entrypoint', '/bin/ash',
+                    f'{parsed_args.bashbrew_repo}:{tag}',
+                        '-c','apk search --no-cache {}'.format(shlex.quote(parsed_args.software))
+            ])
+
+            for line in raw_output.decode().split():
+                software_match = software_regex.match(line)
+                if software_match:
+                    break
+
+            software_match_1 = software_match.group(1)
+            if not software_match_1:
+                continue
+
+            versions[tag] = software_match_1
+
+        duplicates = {}
+        for k, v in versions.items():
+            if k == 'latest':
+                continue
+            if v in duplicates:
+                duplicates[v].append(k)
+            else:
+                duplicates[v] = [k]
+
+        versions = { 'latest': 'latest' }
+        for k, v in duplicates.items():
+            latest = max(version.parse(each) for each in v)
+            versions[str(latest)] = k
+    else:
+        versions = { each: each for each in alpine_tags if tag_regex.match(each) }
+
+    if parsed_args.pull:
+        pull_args = ['--pull']
+    else:
+        pull_args = []
+
+    for alpine_version, tag in versions.items():
+        final_tag = f'{parsed_args.image}:{tag}'
+        subprocess.check_call(
+            [
+                'docker', 'build', *pull_args,
+                '--build-arg', f'ALPINE_VERSION={alpine_version}',
+                '-t', final_tag,
+                '.'
+            ],
+            cwd=parsed_args.dir
+        )
+
+        if parsed_args.push and parsed_args.registries:
+            for registry in parsed_args.registries:
+                subprocess.check_call(['docker', 'push', f'{registry}/{final_tag}'])
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Build images')
+    parser.add_argument(
+        '--bashbrew-library',
+        required=True,
+        help='Specify bashbrew library'
+    )
+    parser.add_argument(
+        '--bashbrew-repo',
+        required=True,
+        help='Specify bashbrew repo to list'
+    )
+    parser.add_argument(
+        '--pull',
+        action='store_true',
+        help='Pull upstream image while building.'
+    )
+    parser.add_argument(
+        '--push',
+        action='store_true',
+        help='Push the docker image to specified registries. '
+        'Ignored when --registries is not set.'
+    )
+    parser.add_argument(
+        '--software',
+        help='Software version to check for in the alpine image and generate tags'
+        ' from. If not provided, will use tags generated from bashbrew repo instead',
+    )
+    parser.add_argument(
+        '--registries',
+        nargs='+',
+        help='Specify registries to push to. Ignored when --push is not set.'
+    )
+    parser.add_argument(
+        '--image',
+        required=True,
+        help='Image to save to'
+    )
+    parser.add_argument('--dir', required=True, help='Directory to build the image')
+
+    parsed_args = parser.parse_args()
+    run(parsed_args)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass

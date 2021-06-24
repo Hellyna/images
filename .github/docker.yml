@@ -1,0 +1,85 @@
+name: Docker
+on:
+  schedule:
+    - cron: '24 */6 * * *'
+  push:
+    branches:
+      - master
+      - dev-*
+    paths-ignore:
+      - 'README.md'
+  pull_request:
+    branches:
+      - master
+      - dev-*
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log into registry ghcr.io
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log into registry docker.io
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create a new PATH
+        run: mkdir "$HOME/work/bin" && echo "$HOME/work/bin" >> $GITHUB_PATH
+
+      - name: Get bashbrew
+        run: curl -fsSL https://doi-janky.infosiftr.net/job/bashbrew/job/master/lastSuccessfulBuild/artifact/bashbrew-amd64 -o "$HOME/work/bin/bashbrew" && chmod +x "$HOME/work/bin/bashbrew"
+
+      - name: Clone docker official images repo
+        run: git clone --depth=1 https://github.com/docker-library/official-images "$HOME/work/docker-official-images"
+
+      - name: Get branch name
+        id: vars
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+
+      - name: Cache docker layers
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Run build and push alpine-base
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/alpine-base --dir alpine-base --push --registries docker.io ghcr.io
+
+      - name: Run build alpine
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/alpine-base --dir alpine-base
+
+      - name: Run build and push postgres
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/postgres --software postgresql --dir postgres --push --registries docker.io ghcr.io
+
+      - name: Run build postgres
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/postgres --software postgresql --dir postgres
+
+      - name: Run build and push synapse
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/synapse --software synapse --dir synapse --push --registries docker.io ghcr.io
+
+      - name: Run build synapse
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/synapse --software synapse --dir synapse
