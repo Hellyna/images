@@ -11,7 +11,7 @@ def run(parsed_args):
     output = subprocess.check_output(
         ['bashbrew',
             '--library', parsed_args.bashbrew_library,
-            'list', parsed_args.bashbrew_repo,
+            'list', 'alpine',
         ],
     )
     alpine_tags = [
@@ -65,21 +65,21 @@ def run(parsed_args):
     else:
         pull_args = []
 
-    for alpine_version, tag in versions.items():
-        final_tag = f'{parsed_args.image}:{tag}'
-        subprocess.check_call(
-            [
-                'docker', 'build', *pull_args,
-                '--build-arg', f'ALPINE_VERSION={alpine_version}',
-                '-t', final_tag,
-                '.'
-            ],
-            cwd=parsed_args.dir
-        )
+    for repo in parsed_args.repositories:
+        for alpine_version, tag in versions.items():
+            final_tag = f'{repo}:{tag}'
+            subprocess.check_call(
+                [
+                    'docker', 'build', *pull_args,
+                    '--build-arg', f'ALPINE_VERSION={alpine_version}',
+                    '-t', final_tag,
+                    '.'
+                ],
+                cwd=parsed_args.dir
+            )
 
-        if parsed_args.push and parsed_args.registries:
-            for registry in parsed_args.registries:
-                subprocess.check_call(['docker', 'push', f'{registry}/{final_tag}'])
+            if parsed_args.push:
+                subprocess.check_call(['docker', 'push', final_tag])
 
 
 def main():
@@ -90,11 +90,6 @@ def main():
         help='Specify bashbrew library'
     )
     parser.add_argument(
-        '--bashbrew-repo',
-        required=True,
-        help='Specify bashbrew repo to list'
-    )
-    parser.add_argument(
         '--pull',
         action='store_true',
         help='Pull upstream image while building.'
@@ -102,8 +97,8 @@ def main():
     parser.add_argument(
         '--push',
         action='store_true',
-        help='Push the docker image to specified registries. '
-        'Ignored when --registries is not set.'
+        help='Push the docker image to specified repositories. '
+        'Ignored when --repositories is not set.'
     )
     parser.add_argument(
         '--software',
@@ -111,14 +106,10 @@ def main():
         ' from. If not provided, will use tags generated from bashbrew repo instead',
     )
     parser.add_argument(
-        '--registries',
-        nargs='+',
-        help='Specify registries to push to. Ignored when --push is not set.'
-    )
-    parser.add_argument(
-        '--image',
+        '--repositories',
         required=True,
-        help='Image to save to'
+        nargs='+',
+        help='Specify repositories to tag (and push to).'
     )
     parser.add_argument('--dir', required=True, help='Directory to build the image')
 

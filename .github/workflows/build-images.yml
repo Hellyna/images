@@ -62,24 +62,25 @@ jobs:
 
       - name: Run build and push alpine-base
         if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
-        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/alpine-base --dir alpine-base --push --registries docker.io ghcr.io
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --dir alpine-base --push --repositories docker.io/hellyna/alpine-base ghcr.io/hellyna/alpine-base
 
       - name: Run build alpine
         if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
-        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/alpine-base --dir alpine-base
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --dir alpine-base --repositories docker.io/hellyna/alpine-base ghcr.io/hellyna/alpine-base
 
       - name: Run build and push postgres
         if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
-        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/postgres --software postgresql --dir postgres --push --registries docker.io ghcr.io
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software postgresql --dir postgres --push --repositories docker.io/hellyna/postgres ghcr.io/hellyna/postgres
 
       - name: Run build postgres
-        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
-        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/postgres --software postgresql --dir postgres
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software postgresql --dir postgres --repositories docker.io/hellyna/postgres ghcr.io/hellyna/postgres
 
       - name: Run build and push synapse
         if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
-        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/synapse --software synapse --dir synapse --push --registries docker.io ghcr.io
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software synapse --dir synapse --push --repositories docker.io/hellyna/synapse ghcr.io/hellyna/synapse
 
       - name: Run build synapse
-        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
-        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --bashbrew-repo alpine --image hellyna/synapse --software synapse --dir synapse
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software synapse --dir synapse --repositories docker.io/hellyna/synapse ghcr.io/hellyna/synapse
+
