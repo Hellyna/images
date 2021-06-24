@@ -29,7 +29,7 @@ def run(parsed_args):
             raw_output = subprocess.check_output([
                 'docker', 'run', '--rm',
                     '--entrypoint', '/bin/ash',
-                    f'{parsed_args.bashbrew_repo}:{tag}',
+                    f'alpine:{tag}',
                         '-c','apk search --no-cache {}'.format(shlex.quote(parsed_args.software))
             ])
 
