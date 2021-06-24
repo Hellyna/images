@@ -46,6 +46,8 @@ RUN set -eux; \
 
 ENV PYTHONPATH=/usr/local/lib/python3.8/site-packages LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
+EXPOSE 8008/tcp 8009/tcp 8448/tcp
+
 ENTRYPOINT ["/start.py"]
 HEALTHCHECK --start-period=5s --interval=15s --timeout=5s \
     CMD curl -fSs http://localhost:8008/health || exit 1
