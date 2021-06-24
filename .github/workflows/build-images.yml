@@ -73,7 +73,7 @@ jobs:
         run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software postgresql --dir postgres --push --repositories docker.io/hellyna/postgres ghcr.io/hellyna/postgres
 
       - name: Run build postgres
-        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
         run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software postgresql --dir postgres --repositories docker.io/hellyna/postgres ghcr.io/hellyna/postgres
 
       - name: Run build and push synapse
@@ -81,6 +81,6 @@ jobs:
         run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software synapse --dir synapse --push --repositories docker.io/hellyna/synapse ghcr.io/hellyna/synapse
 
       - name: Run build synapse
-        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
         run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software synapse --dir synapse --repositories docker.io/hellyna/synapse ghcr.io/hellyna/synapse
 
