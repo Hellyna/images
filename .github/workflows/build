@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 from packaging import version
 import re
 import shlex
@@ -75,7 +76,8 @@ def run(parsed_args):
                     '-t', final_tag,
                     '.'
                 ],
-                cwd=parsed_args.dir
+                cwd=parsed_args.dir,
+                env={ **os.environ, 'DOCKER_BUILDKIT': '1' },
             )
 
             if parsed_args.push:
