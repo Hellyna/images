@@ -9,7 +9,7 @@ LABEL org.opencontainers.image.licenses='Apache-2.0'
 
 ENV PGDATA /var/lib/postgresql/data
 
-RUN apk add --no-cache bash postgresql && \
+RUN apk add --no-cache bash postgresql tzdata && \
   mkdir -p /docker-entrypoint-initdb.d && \
   install -o postgres -g postgres -dm2777 /var/run/postgresql && \
   install -o postgres -g postgres -dm777 "$PGDATA"
