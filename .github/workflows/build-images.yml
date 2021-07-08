@@ -60,9 +60,6 @@ jobs:
         uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
 
-      - name: Attempt to prune docker images
-        run: docker image prune -f
-
       - name: Run build and push alpine-base
         if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
         run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --dir alpine-base --pull --push --repositories docker.io/hellyna/alpine-base ghcr.io/hellyna/alpine-base
@@ -87,3 +84,5 @@ jobs:
         if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
         run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software synapse --dir synapse --repositories docker.io/hellyna/synapse ghcr.io/hellyna/synapse
 
+      - name: Attempt to prune docker images
+        run: docker image prune -f
