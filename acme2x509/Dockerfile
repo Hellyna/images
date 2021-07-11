@@ -9,8 +9,8 @@ LABEL org.opencontainers.image.licenses='Apache-2.0'
 
 RUN apk add --no-cache inotify-tools jq
 
-COPY /entrypoint /usr/local/bin/entrypoint
-COPY /acme2pem /usr/local/bin/acme2pem
+COPY entrypoint /usr/local/bin/entrypoint
+COPY acme2pem /usr/local/bin/acme2pem
 
 ENTRYPOINT ["entrypoint"]
 
