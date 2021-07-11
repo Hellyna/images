@@ -66,7 +66,15 @@ jobs:
 
       - name: Run build alpine
         if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
-        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --dir alpine-base --pul --repositories docker.io/hellyna/alpine-base ghcr.io/hellyna/alpine-base
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --dir alpine-base --pull --repositories docker.io/hellyna/alpine-base ghcr.io/hellyna/alpine-base
+
+      - name: Run build and push acme2pem
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --dir acme2pem --pull --push --repositories docker.io/hellyna/acme2pem ghcr.io/hellyna/acme2pem
+
+      - name: Run build acme2pem
+        if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref != 'master'
+        run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --dir acme2pem --pull --push --repositories docker.io/hellyna/acme2pem ghcr.io/hellyna/acme2pem
 
       - name: Run build and push postgres
         if: github.event_name != 'pull_request' && steps.vars.outputs.short_ref == 'master'

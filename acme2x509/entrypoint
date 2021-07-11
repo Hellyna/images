@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+if test $# -ne 2; then
+  echo "Usage: $0 <acme.json> <output_dir>" >&2
+  exit 1
+fi
+
+export ACME_JSON="$1"
+export OUTPUT_DIR="$2"
+
+inotifyd acme2pem "$1"

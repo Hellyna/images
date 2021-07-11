@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+if test $# -ne 2 -o -z "$ACME_JSON" -o -z "$OUTPUT_DIR"; then
+  echo "Usage: $0 <acme.json> <output_dir>" >&2
+  echo 'Or call the script with $ACME_JSON and $OUTPUT_DIR set.'
+  exit 1
+fi
+
+if test -z "$ACME_JSON"; then
+  ACME_JSON=$1
+fi
+
+if test -z "$OUTPUT_DIR"; then
+  OUTPUT_DIR=$2
+fi
+
+cat "$ACME_JSON" | jq '. | keys[] as $k | "\(.[$k].Certificates[].key)"' -r | base64 -d - > "$OUTPUT_DIR/key.pem"
+cat "$ACME_JSON" | jq '. | keys[] as $k | "\(.[$k].Certificates[].certificate)"' -r | base64 -d - > "$OUTPUT_DIR/cert.pem"
+
+chmod 600 "$OUTPUT_DIR/key.pem"
+chmod 644 "$OUTPUT_DIR/cert.pem"
