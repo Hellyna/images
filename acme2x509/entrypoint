@@ -10,4 +10,4 @@ fi
 export ACME_JSON="$1"
 export OUTPUT_DIR="$2"
 
-exec inotifyd acme2pem "$1"
+exec inotifyd acme2pem "$1:c"
