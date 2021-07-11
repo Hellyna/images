@@ -93,4 +93,4 @@ jobs:
         run: ./.github/workflows/build --bashbrew-library "$HOME/work/docker-official-images/library" --software synapse --dir synapse --repositories docker.io/hellyna/synapse ghcr.io/hellyna/synapse
 
       - name: Attempt to prune docker images
-        run: docker image prune -f
+        run: docker image prune --filter until=24h -f
