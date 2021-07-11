@@ -25,8 +25,8 @@ RUN set -eux; \
 FROM hellyna/alpine-base:${ALPINE_VERSION}
 
 LABEL org.opencontainers.image.url='https://github.com/hellyna/images'
-LABEL org.opencontainers.image.documentation='https://github.com/hellyna/images/README.md'
-LABEL org.opencontainers.image.source='https://github.com/hellyna/images/synapse'
+LABEL org.opencontainers.image.documentation='https://github.com/hellyna/images'
+LABEL org.opencontainers.image.source='https://github.com/hellyna/images'
 LABEL org.opencontainers.image.licenses='Apache-2.0'
 
 RUN apk add --no-cache \
