@@ -16,8 +16,8 @@ if test -z "$OUTPUT_DIR"; then
   OUTPUT_DIR=$2
 fi
 
-cat "$ACME_JSON" | jq '. | keys[] as $k | "\(.[$k].Certificates[].key)"' -r | base64 -d - > "$OUTPUT_DIR/key.pem"
-cat "$ACME_JSON" | jq '. | keys[] as $k | "\(.[$k].Certificates[].certificate)"' -r | base64 -d - > "$OUTPUT_DIR/cert.pem"
+cat "$ACME_JSON" | jq '. | keys[] as $k | "\(.[$k].Certificates[].key)"' -r | base64 -d > "$OUTPUT_DIR/key.pem"
+cat "$ACME_JSON" | jq '. | keys[] as $k | "\(.[$k].Certificates[].certificate)"' -r | base64 -d > "$OUTPUT_DIR/cert.pem"
 
 chmod 600 "$OUTPUT_DIR/key.pem"
 chmod 644 "$OUTPUT_DIR/cert.pem"
